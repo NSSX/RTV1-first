@@ -80,16 +80,107 @@ int intersection_sphere(t_sphere *sphere, t_ray *ray, double *coef)
   return (-1);
 }
 
+double inter_sphere(t_ray *ray, t_sphere *sphere)
+{
+  double a;
+  double b;
+  double c;
+  a = (ray->d->x * ray->d->x) + (ray->d->y * ray->d->y) + (ray->d->z * ray->d->z);
+  b = 2 * (ray->d->x * (ray->o->x - sphere->pos->x) + ray->d->y * (ray->o->y - sphere->pos->y) + ray->d->z * (ray->o->z - sphere->pos->z));
+  c = (((ray->o->x - sphere->pos->x) * (ray->o->x - sphere->pos->x)) + ((ray->o->y - sphere->pos->y) * (ray->o->y - sphere->pos->y)) + ((ray->o->z - sphere->pos->z) * (ray->o->z - sphere->pos->z))) - (sphere->radius * sphere->radius);
+  double det;
+  det = (b * b) - (4 * a * c);
+  if(det < 0)
+    {
+      return (-1);
+    }
+  double t1;
+  double t2;
+  t1 = (-b + sqrt(det)) / (2*a);
+  t2 =  (-b - sqrt(det)) / (2*a);
+  if(det == 0)
+    return (t1);
+  if(t1 < t2)
+    {
+      return (t1);
+    }
+  else
+    return (t2);
+}
+
+double inter_p(t_ray *ray)
+{
+  double a = -10;
+  double b = -10;
+  double c = -10;
+
+  if(a * ray->o->x + b * ray->o->y + c * ray->o->z == 0)
+    {
+      return (1);
+    }
+  return (-1);
+}
 
 
-void do_all(t_struct *mystruct)
+double inter_cylindre(t_ray *ray, t_sphere *sphere)
+{
+  double a;
+  double b;
+  double c;
+  a = (ray->o->x * ray->o->x) + (ray->o->y * ray->o->y);
+  b = (2 * (ray->o->x * sphere->pos->x)) + (2 * (ray->o->y * sphere->pos->y));
+  c = (sphere->pos->x * sphere->pos->x) + (sphere->pos->y * sphere->pos->y) - (sphere->radius * sphere->radius);
+  double det;
+  det = (b * b) - (4 * a * c);
+  if(det < 0)
+    {
+      return (-1);
+    }
+  double t1;
+  double t2;
+  t1 = (-b + sqrt(det)) / (2*a);
+  t2 =  (-b - sqrt(det)) / (2*a);
+  if(det == 0)
+    return (t1);
+  if(t1 < t2)
+    {
+      return (t1);
+    }
+  else
+  return (t2);
+  return (2);
+}
+
+int ft_plane(t_ray *ray, t_vec3d *plane)
+{
+  return (0);
+}
+//x0 y0 z0 a point on the plane
+/* plane
+nx(x-x0)+ny(y-y0)+nz(z - z0) = 0
+nx ny nz normal vector of the plane
+*/
+
+//Ray
+//x = xs + t * xd
+/*y = ys + t * yd
+z = zs + t *zd
+xs ys zs sart point
+xd yd zd direction vector
+*/
+//nx(xs + t * xd-x0) + ny(ys + t *yd - y0)+nz(zs + t * zd - z0) = 0
+//nx * xs + t *xd *nx - x0 * nx + ny * ys + t * yd * ny + y0+ny + nz * zs + t * zd * nz - nz - n * z0 = 0
+
+
+
+void do_all(t_struct *mystruct, double z1, double z2, double x1, double y1)
 {
   t_sphere *sphere;
   sphere = (t_sphere *)malloc(sizeof(t_sphere) * 3);
   sphere->pos = (t_vec3d *)malloc(sizeof(t_vec3d) * 4);
   sphere->pos->x = 0;
   sphere->pos->y = 0;
-  sphere->pos->z = 399;
+  sphere->pos->z = z1;
   sphere->radius = 20;
 
   t_sphere *sphere2;
@@ -97,18 +188,43 @@ void do_all(t_struct *mystruct)
   sphere2->pos = (t_vec3d *)malloc(sizeof(t_vec3d) * 4);
   sphere2->pos->x = 1;
   sphere2->pos->y = 0;
-  sphere2->pos->z = 400;
+  sphere2->pos->z = 200;
   sphere2->radius = 20;
 
+  t_sphere *sphere3;
+  sphere3 = (t_sphere *)malloc(sizeof(t_sphere) * 3);
+  sphere3->pos = (t_vec3d *)malloc(sizeof(t_vec3d) * 4);
+  sphere3->pos->x = 80;
+  sphere3->pos->y = 0;
+  sphere3->pos->z = z2;
+  sphere3->radius = 20;
+
+  t_sphere *sphere4;
+  sphere4 = (t_sphere *)malloc(sizeof(t_sphere) * 3);
+  sphere4->pos = (t_vec3d *)malloc(sizeof(t_vec3d) * 4);
+  sphere4->pos->x = 20;
+  sphere4->pos->y = 10;
+  sphere4->pos->z = 800;
+  sphere4->radius = 1;
+
+
+  t_vec3d *plane;
+  plane = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
+  plane->x = 0;
+  plane->y = 0;
+  plane->z = 1;
 
   t_vec3d *a;
   a = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
-  a->x = 0;
-  a->y = 0;
+  a->x = x1;
+  a->y = y1;
   a->z = -1;
   
   t_vec3d *b;
   b = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
+  b->x = 0;
+  b->y = 0;
+  b->z = 0;
 
   t_vec3d *raydir;
   raydir = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
@@ -124,6 +240,19 @@ void do_all(t_struct *mystruct)
   int debug;
   debug = 0;
 
+  t_vec3d *Lumiere;
+  Lumiere = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
+  Lumiere->x = 0;
+  Lumiere->y = 0;//-500;
+    Lumiere->z = -1000;
+  
+  t_vec3d *LumiereCouleur;
+  LumiereCouleur = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
+  LumiereCouleur->x = 0.5;
+  LumiereCouleur->y = 0.5;
+  LumiereCouleur->z = 0.5;
+
+
 for(int pixel_y = 0; pixel_y < HEIGHT - 1; pixel_y++)
     {
       for(int pixel_x = 0; pixel_x < WIDTH - 1; pixel_x++)
@@ -131,7 +260,6 @@ for(int pixel_y = 0; pixel_y < HEIGHT - 1; pixel_y++)
 	  b->x = pixel_x - (WIDTH / 2);
 	  b->y = pixel_y - (HEIGHT / 2);
 	  b->z = -(WIDTH / (2 * tan(30 / 2)));
-
 	  vector_normalize(b);
 
 	  raydir->x = b->x - a->x;
@@ -139,37 +267,84 @@ for(int pixel_y = 0; pixel_y < HEIGHT - 1; pixel_y++)
 	  raydir->z = b->z - a->z;
 	  vector_normalize(raydir);
 
-
+	  
 	  rayon->d->x = raydir->x;
 	  rayon->d->y = raydir->y;
 	  rayon->d->z = raydir->z;
       	  
 	  double coef = 20000;
-	  int inter = intersection_sphere(sphere,rayon, &coef);
-	  int inter2 = intersection_sphere(sphere2,rayon, &coef);
-	  //if(inter == 1)
-	    //	    printf("inter = %d pixel_x = %d pixel_y = %d\n",inter, pixel_x, pixel_y);
-	  if(inter == 0 && coef < 20000)
-	    {
+	  //int inter = intersection_sphere(sphere,rayon, &coef);
+	  int inter2 = intersection_sphere(sphere,rayon, &coef);
+	  if(inter2 != -1)
+	  {
 	      debug++;
-	      my_pixel_put_to_image(mystruct->img, pixel_x, pixel_y, 0x0000FF + pixel_x - pixel_y);
-	      /*		      my_pixel_put_to_image(mystruct->img, pixel_x + 200, pixel_y - 200, 0xFF0000 + pixel_x - pixel_y);
-		my_pixel_put_to_image(mystruct->img, pixel_x - 200, pixel_y + 200, 0x00FF00 + pixel_x - pixel_y);
-	       	my_pixel_put_to_image(mystruct->img, pixel_x, pixel_y - 200, 0xFFFF00 + pixel_x - pixel_y);
-		my_pixel_put_to_image(mystruct->img, pixel_x + 200, pixel_y + 200, 0xFFFFFF + pixel_x - pixel_y);*/
-	    }
-	  if(inter2 == 0 && coef < 20000)
-            {
-	      debug++;
-	      my_pixel_put_to_image(mystruct->img, pixel_x, pixel_y, 0x00FF00 + pixel_x - pixel_y);
+	      t_vec3d *Impact;
+	      Impact = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
+	      Impact->x = rayon->o->x + rayon->d->x * coef;
+	      Impact->y = rayon->o->y + rayon->d->x * coef;
+	      Impact->z = rayon->o->z + rayon->d->z * coef;
+    
+	       t_vec3d *Direction;
+	      t_vec3d *Distance;
+	      Direction = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
+	      Distance = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
+	      Distance->x = Impact->x - sphere->pos->x;
+	      Distance->y = Impact->y - sphere->pos->y;
+	      Distance->z = Impact->z - sphere->pos->z;
+	      vector_normalize(Distance);
+	      double Norme;
+	      Norme = vector_dot(Distance,Distance);
+	      float Temp;
+		Temp = Norme * Norme;
+		Temp = 1 / sqrt(Temp);
+		Norme = Temp * Norme;
+		if(Norme != 0)
+		  {
+		    t_vec3d *RayLightDist;
+		    RayLightDist = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
+		    RayLightDist->x = Lumiere->x - Impact->x;
+		    RayLightDist->y = Lumiere->y - Impact->y;
+		    RayLightDist->z = Lumiere->z - Impact->z;
+		    double NormeRayDist = vector_dot(RayLightDist,RayLightDist);
+      
+		    t_vec3d *RayLightDir;
+		    RayLightDir = (t_vec3d *)malloc(sizeof(t_vec3d) * 1);
+		    if (NormeRayDist != 0)
+		      {
+			RayLightDir->x = RayLightDist->x / Norme;
+			RayLightDir->y = RayLightDist->y / Norme;
+			RayLightDir->z = RayLightDist->z / Norme;
+		      }		   
+		    t_vec3d *IntensityLight;
+		    IntensityLight = vector_mul(RayLightDir,Distance);
+		    float lambert = (IntensityLight->x * Norme) + (IntensityLight->y * Norme)+(IntensityLight->z * Norme);
+        
+		    double Red    = (LumiereCouleur->x * 0.5  * lambert);
+		    double Green  = (LumiereCouleur->y * 0.5  * lambert);
+		    double Blue   = (LumiereCouleur->z * 0.5  * lambert) ;
+		    if(Red < 0)
+		      Red = 0;
+		    if(Green < 0)
+		      Green = 0;
+		    if(Blue < 0)
+		      Blue = 0;
+		    if(Red > 255)
+		      Red = 255;
+		    if(Blue > 255)
+		      Blue = 255;
+		    if(Green > 255)
+		      Green = 255;
+		    my_pixel_put_to_image(mystruct->img, pixel_x, pixel_y, RGB(Red,Green,Blue));		    
+
+		  }
 	    }
 	}
     }
- if(debug == 0)
+/* if(debug == 0)
    {
      printf("debug work\n");
-     do_all(mystruct);
-   }
+     do_all(mystruct,z1,z2);
+     }*/
 }
 
 void line(t_img *myimg, float xi, float yi, float xf, float yf, int color)
@@ -226,8 +401,77 @@ void            my_pixel_put_to_image(t_img *myimg, int x, int y, int color)
 
 int                     event_mlx(int keycode, t_struct *mystruct)
 {
+  static double z1;
+  static double z2;
+  static double x1;
+  static double y1;
+  static double z;
+
+  if(!z)
+    z = -1;
+  if(!x1)
+    x1 = 0;
+  if(!y1)
+    y1 = 0;
+  if(!z1)
+    z1 = 400;
+  if(!z2)
+    z2 = 400;
+
   if (keycode == 53)
     exit(1);
+  if(keycode == 123)
+    {
+      z1 -= 20;
+      mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
+      mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, WIDTH, HEIGHT);
+      do_all(mystruct, z1, z1, x1, y1);
+      mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+    }
+  if(keycode == 124)
+    {
+      z1 += 20;
+      mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
+      mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, WIDTH, HEIGHT);
+      do_all(mystruct, z1, z1, x1, y1);
+      mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+    }
+  if(keycode == 0)
+    {
+      //gauche
+      x1 += 0.03;
+      mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
+      mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, WIDTH, HEIGHT);
+      do_all(mystruct, z1, z1, x1, y1);
+      mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+    }
+  if(keycode == 2)
+    {
+      //droite
+      x1 -= 0.03;
+      mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
+      mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, WIDTH, HEIGHT);
+      do_all(mystruct, z1, z1, x1, y1);
+      mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+    }
+  if(keycode == 13)
+    {
+      //haut
+      y1 += 0.03;
+      mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
+      mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, WIDTH, HEIGHT);
+      do_all(mystruct, z1, z1, x1, y1);
+      mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+    }
+  if(keycode == 1)
+    {
+      y1 -= 0.03;
+      //bas
+      mlx_destroy_image(mystruct->mlx, mystruct->img->img_ptr);
+      mystruct->img->img_ptr = mlx_new_image(mystruct->mlx, WIDTH, HEIGHT);
+      do_all(mystruct, z1, z1, x1, y1);
+      mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+    }
   return (0);
 }
 
@@ -436,8 +680,8 @@ int                     main(int argc, char **argv)
   //draw_cone(mystruct, 0xFFFF00, WIDTH / 2 - 100, HEIGHT / 2 - 20, 50, 50);
 //  DrawFilledCircle(mystruct, (WIDTH / 2) + 20, (HEIGHT / 2) - 20, 100, 0xFF0000 / 2);  
   // my_pixel_put_to_image(mystruct->img, 200, 200, 0x00FFFF);
-  do_all(mystruct);  
-mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
+  do_all(mystruct, 400, 400, 0, 0);  
+  mlx_put_image_to_window(mystruct->mlx, mystruct->win, mystruct->img->img_ptr, 0, 0);
   mlx_key_hook(mystruct->win, event_mlx, mystruct);
   mlx_loop(mystruct->mlx);
   return (0);
