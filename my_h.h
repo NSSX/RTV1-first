@@ -11,6 +11,7 @@
 
 typedef struct                                                                  s_img
 {
+  double cos;
   void                            *mlx;
   void                            *win;
   unsigned long           img_color;
@@ -32,6 +33,9 @@ typedef struct                                                                  
   void                            *win;
   t_img                           *img;
   int color;
+  double decx;
+  double decy;
+  double decz;
 }                                                                                               t_struct;
 
 typedef struct s_vec3d
@@ -39,12 +43,19 @@ typedef struct s_vec3d
   double x;
   double y;
   double z;
+  double v;
 }		t_vec3d;
 
 typedef struct s_ray
 {
   t_vec3d *o;
   t_vec3d *d;
+  double vx;
+  double vy;
+  double vz;
+  double xeye;
+  double yeye;
+  double zeye;
 }		t_ray;
 
 typedef struct s_sphere
@@ -53,7 +64,20 @@ typedef struct s_sphere
   double radius;
 }		t_sphere;
 
+typedef struct s_light
+{
+  double x;
+  double y;
+  double z;
+  double dx;
+  double dy;
+  double dz;
+  double ox;
+  double oy;
+  double oz;
+}		t_light;
+  
 
-
+double mypow(int a, int n);
 void my_pixel_put_to_image(t_img *myimg, int x, int y, int color);
 #endif
